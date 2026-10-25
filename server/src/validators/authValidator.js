@@ -19,12 +19,25 @@ const registerSchema = z
       .min(8, 'Password must be at least 8 characters')
       .regex(passwordRegex, 'Password must contain at least one letter and one number'),
     confirmPassword: z.string(),
-    role: z.enum(['admin', 'user']).optional().default('user')
+    role: z.enum(['admin', 'user']).optional().default('user'),
+    adminSecretKey: z.string().optional()
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword']
-  });
+  })
+  .refine(
+    (data) => {
+      if (data.role === 'admin') {
+        return Boolean(data.adminSecretKey && data.adminSecretKey.trim().length > 0);
+      }
+      return true;
+    },
+    {
+      message: 'Admin secret key is required for admin registration',
+      path: ['adminSecretKey']
+    }
+  );
 
 const loginSchema = z.object({
   email: z

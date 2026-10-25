@@ -46,10 +46,16 @@ async function createRefreshTokenRecord({ user, family = null, userAgent = '', i
 }
 
 class AuthService {
-  async register({ name, email, password, role }, { userAgent = '', ip = '' } = {}) {
+  async register({ name, email, password, role, adminSecretKey }, { userAgent = '', ip = '' } = {}) {
     const existing = await User.findOne({ email });
     if (existing) {
       throw ApiError.conflict('An account with this email address already exists');
+    }
+
+    if (role === 'admin') {
+      if (!adminSecretKey || adminSecretKey !== env.ADMIN_SECRET_KEY) {
+        throw ApiError.forbidden('Invalid admin secret key. You are not authorized to register as an administrator.');
+      }
     }
 
     const passwordHash = await User.hashPassword(password);

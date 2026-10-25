@@ -53,6 +53,50 @@ describe('Auth Endpoints', () => {
       expect(res.body.success).toBe(false);
       expect(res.body.error.code).toBe('VALIDATION_ERROR');
     });
+
+    it('should fail when registering as admin without secret key', async () => {
+      const res = await request(app)
+        .post('/api/v1/auth/register')
+        .send({
+          ...validUser,
+          email: 'admin_attempt@example.com',
+          role: 'admin'
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('should fail when registering as admin with invalid secret key', async () => {
+      const res = await request(app)
+        .post('/api/v1/auth/register')
+        .send({
+          ...validUser,
+          email: 'admin_attempt2@example.com',
+          role: 'admin',
+          adminSecretKey: 'wrong_secret'
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.message).toContain('Invalid admin secret key');
+    });
+
+    it('should successfully register as admin with valid secret key', async () => {
+      const res = await request(app)
+        .post('/api/v1/auth/register')
+        .send({
+          ...validUser,
+          email: 'admin_success@example.com',
+          role: 'admin',
+          adminSecretKey: 'admin_secret_key_123'
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.user.role).toBe('admin');
+    });
   });
 
   describe('POST /api/v1/auth/login', () => {

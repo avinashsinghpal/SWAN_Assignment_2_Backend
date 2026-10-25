@@ -23,7 +23,8 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().default('Tasklane Notifications <noreply@tasklane.com>'),
   ALLOW_SEED: z.preprocess((val) => val === 'true' || val === true, z.boolean()).default(false),
   SEED_ADMIN_PASSWORD: z.string().default('AdminPass123!'),
-  SEED_USER_PASSWORD: z.string().default('UserPass123!')
+  SEED_USER_PASSWORD: z.string().default('UserPass123!'),
+  ADMIN_SECRET_KEY: z.string().default('admin_secret_key_123')
 });
 
 let parsedEnv;
@@ -49,6 +50,7 @@ try {
       MONGODB_URI: 'mongodb://localhost:27017/tasklane-test',
       JWT_ACCESS_SECRET: 'test_access_secret_with_at_least_32_characters_length',
       JWT_REFRESH_SECRET: 'test_refresh_secret_with_at_least_32_characters_length',
+      ADMIN_SECRET_KEY: 'admin_secret_key_123',
       ...process.env
     });
   }
